@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
-import UrgentRequestCard from "./UrgentRequestCard.jsx";
+import RequestCard from "../../requests/components/RequestCard.jsx";
 
 const containerVariants = {
   hidden: {},
@@ -12,7 +12,12 @@ const containerVariants = {
   },
 };
 
-export default function HomeUrgentSection({ urgentRequests }) {
+export default function HomeUrgentSection({
+  urgentRequests,
+  onHelp,
+  onChat,
+  activeAction,
+}) {
   const MotionDiv = motion.div;
 
   return (
@@ -20,18 +25,21 @@ export default function HomeUrgentSection({ urgentRequests }) {
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="flex items-center gap-3 text-4xl font-black text-red-600">
-              <AlertTriangle size={34} />
-              Urgent Help Needed
+            <span className="nh-kicker">
+              <AlertTriangle size={14} />
+              Priority requests
+            </span>
+            <h2 className="mt-5 flex items-center gap-3 text-4xl font-black text-slate-900">
+              Urgent help needed nearby
             </h2>
-            <p className="mt-2 text-lg text-slate-500">
-              People nearby need your help right now
+            <p className="mt-3 text-lg text-slate-500">
+              These requests need faster responses because the situation is time-sensitive or location-critical.
             </p>
           </div>
 
           <Link
             to="/browse"
-            className="inline-flex w-fit rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+            className="nh-button-secondary w-fit px-4 py-3"
           >
             View All
           </Link>
@@ -45,7 +53,13 @@ export default function HomeUrgentSection({ urgentRequests }) {
           className="grid gap-6 xl:grid-cols-3"
         >
           {urgentRequests.map((request) => (
-            <UrgentRequestCard key={request.id} request={request} />
+            <RequestCard
+              key={request.id}
+              request={request}
+              onHelp={onHelp}
+              onChat={onChat}
+              activeAction={activeAction}
+            />
           ))}
         </MotionDiv>
       </div>

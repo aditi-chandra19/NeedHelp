@@ -30,6 +30,19 @@ export function setStoredSession(session) {
   window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
 }
 
+export function updateStoredSessionUser(user) {
+  const currentSession = getStoredSession();
+
+  if (!currentSession) {
+    return;
+  }
+
+  setStoredSession({
+    ...currentSession,
+    user,
+  });
+}
+
 export function clearStoredSession() {
   window.localStorage.removeItem(SESSION_STORAGE_KEY);
 }

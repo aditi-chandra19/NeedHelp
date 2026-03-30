@@ -2,7 +2,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../modules/auth/pages/LoginPage.jsx";
 import RegisterPage from "../modules/auth/pages/RegisterPage.jsx";
 import HomePage from "../modules/home/pages/HomePage.jsx";
-import ComingSoonPage from "../modules/common/pages/ComingSoonPage.jsx";
+import BrowsePage from "../modules/requests/pages/BrowsePage.jsx";
+import PostRequestPage from "../modules/requests/pages/PostRequestPage.jsx";
+import ProfilePage from "../modules/profile/pages/ProfilePage.jsx";
 import GuestRoute from "./GuestRoute.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import { getStoredSession } from "../modules/auth/services/session.js";
@@ -22,33 +24,9 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route path="/home" element={<HomePage />} />
         <Route path="/dashboard" element={<Navigate to="/home" replace />} />
-        <Route
-          path="/browse"
-          element={
-            <ComingSoonPage
-              title="Browse Requests"
-              description="The full browse experience is the next screen to build. The route is live, protected, and ready for the detailed UI from your Figma."
-            />
-          }
-        />
-        <Route
-          path="/post"
-          element={
-            <ComingSoonPage
-              title="Post a Request"
-              description="Your posting flow will live here next. We kept the route ready so the Home page navigation already works cleanly."
-            />
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ComingSoonPage
-              title="Profile"
-              description="The profile experience is not designed yet in this app, so this protected placeholder keeps the navigation stable until we build it."
-            />
-          }
-        />
+        <Route path="/browse" element={<BrowsePage />} />
+        <Route path="/post" element={<PostRequestPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Route>
 
       <Route path="*" element={<Navigate to={defaultRoute} replace />} />
