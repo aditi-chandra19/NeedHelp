@@ -344,7 +344,7 @@ export default function PostRequestPage() {
       <main className="px-4 pb-16 pt-10 md:px-6">
         <div className="mx-auto max-w-6xl">
           <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#8b7656]">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5f7ea8]">
               Request support nearby
             </p>
             <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
@@ -379,6 +379,18 @@ export default function PostRequestPage() {
           <div className="nh-panel mx-auto mt-8 max-w-5xl p-6 sm:p-8">
             {currentStep === 1 ? (
               <section className="space-y-6">
+                <div className="rounded-[1.5rem] border border-[#e1e9f2] bg-[#fbfdff] px-5 py-5">
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#5f7ea8]">
+                    Step 1
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold text-slate-900">
+                    Describe the request clearly
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    Clear titles, honest urgency, and a precise location help the right people respond faster.
+                  </p>
+                </div>
+
                 <div>
                   <label
                     className="mb-2 block text-sm font-semibold text-slate-800"
@@ -430,7 +442,7 @@ export default function PostRequestPage() {
                     placeholder="Provide more details about what you need. Be specific to get better responses."
                     maxLength={500}
                     rows={6}
-                    className="w-full rounded-[1.1rem] border border-[#ddd4c7] bg-[rgba(255,252,247,0.96)] px-4 py-4 text-sm leading-7 text-slate-700 outline-none transition focus:border-[#5f80af] focus:bg-[#fffdf9] focus:ring-4 focus:ring-[rgba(95,128,175,0.12)]"
+                    className="w-full rounded-[1.1rem] border border-[#dbe4ee] bg-white px-4 py-4 text-sm leading-7 text-slate-700 outline-none transition focus:border-[#5f80af] focus:bg-[#fbfdff] focus:ring-4 focus:ring-[rgba(95,128,175,0.12)]"
                   />
                   <p className="mt-2 text-xs text-slate-400">
                     {formData.description.length}/500 characters
@@ -501,8 +513,20 @@ export default function PostRequestPage() {
 
             {currentStep === 2 ? (
               <section>
+                <div className="rounded-[1.5rem] border border-[#e1e9f2] bg-[#fbfdff] px-5 py-5">
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#5f7ea8]">
+                    Step 2
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold text-slate-900">
+                    Help the system route it well
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    Category and urgency decide who sees the request first and how quickly it gets surfaced.
+                  </p>
+                </div>
+
                 <div>
-                  <p className="text-sm font-semibold text-slate-800">
+                  <p className="mt-8 text-sm font-semibold text-slate-800">
                     Select Category *
                   </p>
                   <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -560,6 +584,18 @@ export default function PostRequestPage() {
 
             {currentStep === 3 ? (
               <section className="space-y-6">
+                <div className="rounded-[1.5rem] border border-[#e1e9f2] bg-[#fbfdff] px-5 py-5">
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#5f7ea8]">
+                    Step 3
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold text-slate-900">
+                    Review trust, payment, and summary
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    Add optional incentives, double-check the details, and post once the request feels accurate.
+                  </p>
+                </div>
+
                 <div>
                   <label
                     className="mb-2 block text-sm font-semibold text-slate-800"
@@ -669,7 +705,7 @@ export default function PostRequestPage() {
                   )}
                 </div>
 
-                <div className="rounded-[1.75rem] border border-[#ddd4c7] bg-[#f8f3ea] p-5">
+                <div className="rounded-[1.75rem] border border-[#dfe8f1] bg-[#f8fbfe] p-5">
                   <h2 className="text-2xl font-bold text-slate-900">Request Summary</h2>
                   <div className="mt-5 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
                     <div>
@@ -695,7 +731,7 @@ export default function PostRequestPage() {
                   </div>
                 </div>
 
-                <div className="rounded-[1.75rem] border border-[#d7e1ee] bg-[#eef3f8] p-5">
+                <div className="rounded-[1.75rem] border border-[#dfe8f1] bg-[#f5f9fd] p-5">
                   <div className="flex items-start gap-3">
                     <div className="mt-1 text-[#35557e]">
                       <ShieldAlert size={20} />
@@ -751,7 +787,7 @@ export default function PostRequestPage() {
           </div>
 
           {currentStep === 1 ? (
-            <div className="mx-auto mt-6 max-w-5xl rounded-[1.75rem] border border-[#d7e1ee] bg-[#eef3f8] p-6">
+            <div className="mx-auto mt-6 max-w-5xl rounded-[1.75rem] border border-[#dfe8f1] bg-[#f5f9fd] p-6">
               <div className="flex items-center gap-2 text-[#233b5d]">
                 <Info size={16} />
                 <p className="font-semibold">Tips for better responses</p>

@@ -16,7 +16,7 @@ import {
 } from "../../auth/services/session.js";
 import BrowseMapView from "../components/BrowseMapView.jsx";
 import RequestCard from "../components/RequestCard.jsx";
-import { fetchRequests, requestChat, requestHelp } from "../services/requestService.js";
+import { fetchRequests } from "../services/requestService.js";
 
 const containerVariants = {
   hidden: {},
@@ -43,7 +43,6 @@ export default function BrowsePage() {
   const [status, setStatus] = useState({ type: "", message: "" });
   const [toast, setToast] = useState({ type: "", message: "" });
   const [isLoading, setIsLoading] = useState(true);
-  const [activeAction, setActiveAction] = useState("");
   const session = getStoredSession();
   const user = session?.user;
 
@@ -159,35 +158,6 @@ export default function BrowsePage() {
     updateSearchParams({ q: searchValue.trim() });
   }
 
-  async function handleRequestAction(requestId, actionType) {
-    setActiveAction(`${requestId}:${actionType}`);
-    setStatus({ type: "", message: "" });
-
-    try {
-      const payload =
-        actionType === "help"
-          ? await requestHelp(requestId)
-          : await requestChat(requestId);
-
-      setRequests((current) =>
-        current.map((request) =>
-          request.id === requestId ? payload.request : request
-        )
-      );
-      setStatus({
-        type: "success",
-        message: payload.message,
-      });
-    } catch (error) {
-      setStatus({
-        type: "error",
-        message: error.message || "Unable to complete this action right now.",
-      });
-    } finally {
-      setActiveAction("");
-    }
-  }
-
   return (
     <AppPageFrame onLogout={handleLogout} user={user}>
       {toast.message ? (
@@ -207,7 +177,7 @@ export default function BrowsePage() {
       <main className="px-4 pb-16 pt-10 md:px-6">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#8b7656]">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5f7ea8]">
               Explore community requests
             </p>
             <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
@@ -297,7 +267,7 @@ export default function BrowsePage() {
                 : `Found ${requests.length} request${requests.length === 1 ? "" : "s"} nearby`}
             </p>
             {summary ? (
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#d7e1ee] bg-[#eef3f8] px-4 py-2 text-sm text-[#35557e]">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#dbe4ee] bg-[#f5f9fd] px-4 py-2 text-sm text-[#35557e]">
                 <span className="font-semibold">{summary.averageResponse}</span>
                 average response across active neighborhoods
               </div>
@@ -343,9 +313,6 @@ export default function BrowsePage() {
                 <RequestCard
                   key={request.id}
                   request={request}
-                  onHelp={(requestId) => handleRequestAction(requestId, "help")}
-                  onChat={(requestId) => handleRequestAction(requestId, "chat")}
-                  activeAction={activeAction}
                   variants={fadeUpItem}
                 />
               ))}

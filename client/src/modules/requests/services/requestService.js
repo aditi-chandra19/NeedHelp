@@ -65,6 +65,77 @@ export async function requestChat(requestId) {
   };
 }
 
+export async function fetchRequestDetail(requestId) {
+  const payload = await apiRequest(`/api/requests/${requestId}`, {
+    requiresAuth: true,
+  });
+
+  return {
+    ...payload,
+    request: decorateRequest(payload.request),
+  };
+}
+
+export async function submitRequestResponse(requestId, message) {
+  const payload = await apiRequest(`/api/requests/${requestId}/responses`, {
+    method: "POST",
+    body: { message },
+    requiresAuth: true,
+  });
+
+  if (payload.user) {
+    updateStoredSessionUser(payload.user);
+  }
+
+  return {
+    ...payload,
+    detail: {
+      ...payload.detail,
+      request: decorateRequest(payload.detail.request),
+    },
+  };
+}
+
+export async function fetchMessages() {
+  const payload = await apiRequest("/api/messages", {
+    requiresAuth: true,
+  });
+
+  if (payload.user) {
+    updateStoredSessionUser(payload.user);
+  }
+
+  return payload;
+}
+
+export async function sendConversationMessage(conversationId, text) {
+  const payload = await apiRequest(`/api/messages/${conversationId}`, {
+    method: "POST",
+    body: { text },
+    requiresAuth: true,
+  });
+
+  if (payload.user) {
+    updateStoredSessionUser(payload.user);
+  }
+
+  return payload;
+}
+
+export async function updateConversationSettings(conversationId, settings) {
+  const payload = await apiRequest(`/api/messages/${conversationId}/settings`, {
+    method: "POST",
+    body: settings,
+    requiresAuth: true,
+  });
+
+  if (payload.user) {
+    updateStoredSessionUser(payload.user);
+  }
+
+  return payload;
+}
+
 export async function fetchRequestForm() {
   const payload = await apiRequest("/api/request-form", {
     requiresAuth: true,
@@ -99,4 +170,30 @@ export async function generateRequestSuggestion(requestData) {
     body: requestData,
     requiresAuth: true,
   });
+}
+
+export async function completeRequest(requestId) {
+  const payload = await apiRequest(`/api/requests/${requestId}/complete`, {
+    method: "POST",
+    requiresAuth: true,
+  });
+
+  if (payload.user) {
+    updateStoredSessionUser(payload.user);
+  }
+
+  return payload;
+}
+
+export async function deleteRequest(requestId) {
+  const payload = await apiRequest(`/api/requests/${requestId}/delete`, {
+    method: "POST",
+    requiresAuth: true,
+  });
+
+  if (payload.user) {
+    updateStoredSessionUser(payload.user);
+  }
+
+  return payload;
 }

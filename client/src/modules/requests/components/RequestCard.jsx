@@ -3,11 +3,11 @@ import {
   Bell,
   HeartHandshake,
   MapPin,
-  MessageSquare,
   ShieldCheck,
   Star,
   Wallet,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   getToneClasses,
   getUrgencyClasses,
@@ -15,22 +15,19 @@ import {
 
 export default function RequestCard({
   request,
-  onHelp,
-  onChat,
-  activeAction = "",
   variants,
 }) {
   const MotionArticle = motion.article;
+  const navigate = useNavigate();
   const tone = getToneClasses(request.tone);
   const urgencyStyles = getUrgencyClasses(request.urgency);
-  const isHelping = activeAction === `${request.id}:help`;
-  const isChatting = activeAction === `${request.id}:chat`;
 
   return (
     <MotionArticle
       variants={variants}
       whileHover={{ y: -5 }}
-      className="overflow-hidden rounded-[2rem] border border-[#ddd4c7] bg-[#fffaf3] shadow-[0_22px_48px_rgba(15,23,42,0.07)]"
+      onClick={() => navigate(`/requests/${request.id}`)}
+      className="cursor-pointer overflow-hidden rounded-[2rem] border border-[#dbe4ee] bg-[rgba(255,255,255,0.96)] shadow-[0_22px_48px_rgba(15,23,42,0.07)] transition hover:border-[#bccddd]"
     >
       <div className={`h-1.5 ${tone.line}`} />
       <div className="p-5">
@@ -62,7 +59,7 @@ export default function RequestCard({
           {request.description}
         </p>
 
-        <div className="mt-5 rounded-2xl border border-[#ebe3d6] bg-[#f8f3ea] p-4">
+        <div className="mt-5 rounded-2xl border border-[#e7eef5] bg-[#f8fbfe] p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#233b5d] text-sm font-bold text-white">
               {request.avatar}
@@ -124,24 +121,8 @@ export default function RequestCard({
           </div>
         </div>
 
-        <div className="mt-5 flex gap-3">
-          <button
-            type="button"
-            onClick={() => onHelp(request.id)}
-            disabled={Boolean(activeAction)}
-            className={`flex-1 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 ${tone.button}`}
-          >
-            {request.isHelping ? "Helping" : isHelping ? "Joining..." : "Help Now"}
-          </button>
-          <button
-            type="button"
-            onClick={() => onChat(request.id)}
-            disabled={Boolean(activeAction)}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#ddd4c7] bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-[#fffdf8] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            <MessageSquare size={15} />
-            {isChatting ? "Opening..." : "Chat"}
-          </button>
+        <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-[#dbe4ee] bg-[#f6f9fc] px-4 py-2 text-sm font-semibold text-[#35557e]">
+          Open request details
         </div>
       </div>
     </MotionArticle>

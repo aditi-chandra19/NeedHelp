@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CircleAlert, CircleCheckBig } from "lucide-react";
 import { clearStoredSession, getStoredSession } from "../../auth/services/session.js";
 import AppPageFrame from "../../common/components/AppPageFrame.jsx";
 import HomeHeroSection from "../components/HomeHeroSection.jsx";
@@ -8,7 +7,7 @@ import HomeUrgentSection from "../components/HomeUrgentSection.jsx";
 import HomeCategoriesSection from "../components/HomeCategoriesSection.jsx";
 import HomeHowItWorksSection from "../components/HomeHowItWorksSection.jsx";
 import HomeTrustSection from "../components/HomeTrustSection.jsx";
-import { fetchRequests, requestChat, requestHelp } from "../../requests/services/requestService.js";
+import { fetchRequests } from "../../requests/services/requestService.js";
 import {
   heroStats as heroStatsTemplate,
   steps,
@@ -24,8 +23,6 @@ export default function HomePage() {
   const [requestFeed, setRequestFeed] = useState([]);
   const [categories, setCategories] = useState([]);
   const [summary, setSummary] = useState(null);
-  const [activeAction, setActiveAction] = useState("");
-  const [status, setStatus] = useState({ type: "", message: "" });
 
   const personalizedTitle = useMemo(() => {
     if (!user?.name) {
@@ -109,35 +106,6 @@ export default function HomePage() {
     navigate("/browse");
   }
 
-  async function handleRequestAction(requestId, actionType) {
-    setActiveAction(`${requestId}:${actionType}`);
-    setStatus({ type: "", message: "" });
-
-    try {
-      const payload =
-        actionType === "help"
-          ? await requestHelp(requestId)
-          : await requestChat(requestId);
-
-      setRequestFeed((current) =>
-        current.map((request) =>
-          request.id === requestId ? payload.request : request
-        )
-      );
-      setStatus({
-        type: "success",
-        message: payload.message,
-      });
-    } catch (error) {
-      setStatus({
-        type: "error",
-        message: error.message || "Unable to complete this action right now.",
-      });
-    } finally {
-      setActiveAction("");
-    }
-  }
-
   return (
     <AppPageFrame onLogout={handleLogout} user={user}>
       <main>
@@ -148,30 +116,7 @@ export default function HomePage() {
           onSearchSubmit={handleSearchSubmit}
           heroStats={heroStats}
         />
-        {status.message ? (
-          <div className="mx-auto max-w-6xl px-4 md:px-6">
-            <div
-              className={`flex items-start gap-3 ${
-                status.type === "error"
-                  ? "nh-status-error"
-                  : "nh-status-success"
-              }`}
-            >
-              {status.type === "error" ? (
-                <CircleAlert size={18} className="mt-0.5 shrink-0" />
-              ) : (
-                <CircleCheckBig size={18} className="mt-0.5 shrink-0" />
-              )}
-              <p>{status.message}</p>
-            </div>
-          </div>
-        ) : null}
-        <HomeUrgentSection
-          urgentRequests={urgentRequests}
-          onHelp={(requestId) => handleRequestAction(requestId, "help")}
-          onChat={(requestId) => handleRequestAction(requestId, "chat")}
-          activeAction={activeAction}
-        />
+        <HomeUrgentSection urgentRequests={urgentRequests} />
         <HomeCategoriesSection categories={featuredCategories} />
         <HomeHowItWorksSection steps={steps} />
         <HomeTrustSection trustFeatures={trustFeatures} trustStats={trustStats} />

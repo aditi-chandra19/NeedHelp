@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { CheckCircle2, HeartHandshake } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import NeedHelpLogo from "../../common/components/NeedHelpLogo.jsx";
 
 const containerVariants = {
   hidden: {},
@@ -30,6 +31,7 @@ export default function AuthPageShell({
   const MotionDiv = motion.div;
   const MotionAside = motion.aside;
   const MotionSection = motion.section;
+  const compactHighlights = highlights.slice(0, 2);
 
   return (
     <div className="min-h-screen text-slate-900">
@@ -45,22 +47,18 @@ export default function AuthPageShell({
         <MotionDiv
           animate={{ x: [0, -16, 0], y: [0, 10, 0] }}
           transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute right-[10%] top-12 h-52 w-52 rounded-full bg-[#eedab7]/52 blur-3xl"
+          className="absolute right-[10%] top-12 h-52 w-52 rounded-full bg-[#dbe7f7]/58 blur-3xl"
         />
       </div>
 
       <div className="relative z-10 px-4 py-6 md:px-6 md:py-8">
         <div className="mx-auto max-w-6xl">
-          <Link to="/" className="inline-flex min-w-0 items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-[1.15rem] border border-slate-200 bg-[#233b5d] text-white shadow-[0_12px_28px_rgba(35,59,93,0.16)]">
-              <HeartHandshake size={20} />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-xl font-bold text-slate-900">NeedHelp</p>
-              <p className="truncate text-xs text-slate-500">
-                Neighbors helping neighbors
-              </p>
-            </div>
+          <Link to="/" className="inline-flex min-w-0">
+            <NeedHelpLogo
+              className="max-w-[14rem]"
+              textClassName="text-[1.15rem] md:text-[1.8rem]"
+              taglineClassName="text-[0.67rem]"
+            />
           </Link>
         </div>
 
@@ -70,13 +68,38 @@ export default function AuthPageShell({
           variants={containerVariants}
           className="mx-auto mt-8 grid max-w-6xl items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]"
         >
+          <MotionSection
+            variants={fadeUp}
+            className="nh-panel-soft border border-[#e4ebf3] p-5 lg:hidden"
+          >
+            <span className="nh-kicker">{eyebrow}</span>
+            <h1 className="mt-5 text-3xl font-black tracking-tight text-slate-900">
+              {heading}
+            </h1>
+            <p className="mt-3 text-sm leading-7 text-slate-600">
+              {description}
+            </p>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {compactHighlights.map((item) => (
+                <div
+                  key={item}
+                  className="flex items-start gap-3 rounded-[1.15rem] border border-[#e4ebf3] bg-white px-4 py-3"
+                >
+                  <span className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                    <CheckCircle2 size={15} />
+                  </span>
+                  <span className="text-sm leading-6 text-slate-700">{item}</span>
+                </div>
+              ))}
+            </div>
+          </MotionSection>
+
           <MotionAside
             variants={fadeUp}
             className="hidden max-w-xl lg:block"
           >
-            <span className="nh-kicker">
-              {eyebrow}
-            </span>
+            <span className="nh-kicker">{eyebrow}</span>
 
             <h1 className="mt-8 max-w-3xl text-balance text-5xl font-black tracking-tight text-slate-900 xl:text-6xl">
               {heading}
@@ -117,14 +140,16 @@ export default function AuthPageShell({
             variants={fadeUp}
             className="nh-panel mx-auto w-full max-w-lg overflow-hidden p-6 sm:p-8"
           >
-            <div className="mb-8 border-b border-[#ebe3d6] pb-6 text-center">
+            <div className="mb-8 border-b border-[#e5ecf3] pb-6 text-center">
               <div className="mb-4 flex justify-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-[1.15rem] border border-slate-200 bg-[#233b5d] text-white shadow-[0_12px_28px_rgba(35,59,93,0.16)]">
-                  <HeartHandshake className="h-7 w-7" />
-                </div>
+                <NeedHelpLogo
+                  showTagline={false}
+                  textClassName="text-[1.85rem]"
+                  className="justify-center"
+                />
               </div>
 
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#8b7656]">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5f7ea8]">
                 {cardEyebrow}
               </p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">

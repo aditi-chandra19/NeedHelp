@@ -19,6 +19,10 @@ const loginStats = [
   { value: "98%", label: "Successful matches" },
 ];
 
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
 export default function LoginPage() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -65,6 +69,14 @@ export default function LoginPage() {
       return;
     }
 
+    if (!isValidEmail(formData.email)) {
+      setStatus({
+        type: "error",
+        message: "Please enter a valid email address before signing in.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setStatus({ type: "", message: "" });
 
@@ -95,7 +107,10 @@ export default function LoginPage() {
       setStatus({
         type: "error",
         message:
-          error.message || "The server could not be reached. Try again shortly.",
+          error.message ===
+          "Too many authentication attempts. Please wait a few minutes and try again."
+            ? "Too many sign-in attempts. Wait a few minutes, then try again."
+            : error.message || "The server could not be reached. Try again shortly.",
       });
     } finally {
       setIsSubmitting(false);
@@ -120,6 +135,15 @@ export default function LoginPage() {
         throw new Error(data.message || `Unable to start ${provider} login.`);
       }
 
+      if (data.token && data.user) {
+        setStoredSession({
+          token: data.token,
+          user: data.user,
+        });
+        navigate("/home", { replace: true });
+        return;
+      }
+
       setStatus({
         type: "success",
         message: data.message,
@@ -128,7 +152,10 @@ export default function LoginPage() {
       setStatus({
         type: "error",
         message:
-          error.message || `Unable to start ${provider} sign-in right now.`,
+          error.message ===
+          "Too many authentication attempts. Please wait a few minutes and try again."
+            ? "Too many authentication attempts for now. Please wait a few minutes."
+            : error.message || `Unable to start ${provider} sign-in right now.`,
       });
     } finally {
       setActiveProvider("");
@@ -146,7 +173,7 @@ export default function LoginPage() {
       cardTitle="Welcome back"
       cardDescription="Get back to requests, conversations, and community help in a few seconds."
     >
-      <div className="mb-6 rounded-[1.5rem] border border-[#d7e1ee] bg-[#eef3f8] px-4 py-4">
+      <div className="mb-6 rounded-[1.5rem] border border-[#dfe8f1] bg-[#f7fafe] px-4 py-4">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-[#233b5d]">Demo Account</p>
@@ -157,7 +184,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={fillDemoCredentials}
-            className="rounded-xl border border-[#d7e1ee] bg-white px-3 py-2 text-xs font-semibold text-[#35557e] shadow-sm transition hover:bg-[#f8fbff]"
+            className="nh-button-secondary rounded-xl px-3 py-2 text-xs font-semibold"
           >
             Use Demo
           </button>
@@ -189,13 +216,7 @@ export default function LoginPage() {
           trailingAction={
             <button
               type="button"
-              onClick={() =>
-                setStatus({
-                  type: "success",
-                  message:
-                    "Password reset is not wired yet, but the button is now active.",
-                })
-              }
+              onClick={() => navigate("/forgot-password")}
               className="text-sm font-medium text-[#35557e] transition hover:text-[#233b5d]"
             >
               Forgot?
@@ -234,7 +255,7 @@ export default function LoginPage() {
           type="button"
           onClick={() => handleSocialLogin("google")}
           disabled={activeProvider !== ""}
-          className="h-11 rounded-2xl border border-[#ddd4c7] bg-white font-medium text-slate-700 transition hover:bg-[#fffdf8] disabled:cursor-not-allowed disabled:opacity-70"
+          className="nh-button-secondary h-11 w-full disabled:cursor-not-allowed disabled:opacity-70"
         >
           {activeProvider === "google" ? "Connecting..." : "Google"}
         </button>
@@ -242,7 +263,7 @@ export default function LoginPage() {
           type="button"
           onClick={() => handleSocialLogin("facebook")}
           disabled={activeProvider !== ""}
-          className="h-11 rounded-2xl border border-[#ddd4c7] bg-white font-medium text-slate-700 transition hover:bg-[#fffdf8] disabled:cursor-not-allowed disabled:opacity-70"
+          className="nh-button-secondary h-11 w-full disabled:cursor-not-allowed disabled:opacity-70"
         >
           {activeProvider === "facebook" ? "Connecting..." : "Facebook"}
         </button>

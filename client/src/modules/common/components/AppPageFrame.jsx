@@ -18,10 +18,10 @@ export default function AppPageFrame({ onLogout, user, children }) {
         <MotionDiv
           animate={{ x: [0, -18, 0], y: [0, 10, 0] }}
           transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute right-[10%] top-10 h-52 w-52 rounded-full bg-[#eedab7]/55 blur-3xl"
+          className="absolute right-[10%] top-10 h-52 w-52 rounded-full bg-[#dbe7f7]/58 blur-3xl"
         />
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/55 to-transparent" />
-        <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent_0%,rgba(129,109,79,0.26)_18%,rgba(129,109,79,0.26)_82%,transparent_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent_0%,rgba(95,126,168,0.22)_18%,rgba(95,126,168,0.22)_82%,transparent_100%)]" />
         <div className="absolute inset-x-0 top-[6.75rem] h-px bg-[linear-gradient(90deg,transparent_0%,rgba(23,32,51,0.08)_20%,rgba(23,32,51,0.08)_80%,transparent_100%)]" />
         <div
           className="absolute inset-0 opacity-[0.035]"
@@ -47,14 +47,15 @@ export default function AppPageFrame({ onLogout, user, children }) {
         />
       </MotionDiv>
 
-      <div className="relative z-10">
+      <div className="relative z-[90]">
         <div className="mx-auto max-w-[96rem] px-3 pt-3 md:px-5 md:pt-4">
-          <div className="nh-panel overflow-hidden">
+          <div className="nh-panel overflow-visible">
             <HomeTopNav onLogout={onLogout} user={user} />
           </div>
         </div>
-        {children}
       </div>
+
+      <div className="relative z-10">{children}</div>
     </div>
   );
 }

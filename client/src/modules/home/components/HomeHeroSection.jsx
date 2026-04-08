@@ -120,11 +120,11 @@ export default function HomeHeroSection({
             variants={fadeUpItem}
             className="nh-panel relative overflow-hidden p-6"
           >
-            <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-[#e8dcc7] blur-3xl" />
+            <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-[#dce8f7] blur-3xl" />
             <div className="relative">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#8b7656]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5f7ea8]">
                     Community desk
                   </p>
                   <h3 className="mt-2 text-2xl font-bold text-slate-900">
@@ -138,13 +138,13 @@ export default function HomeHeroSection({
 
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 <div className="nh-panel-soft p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8b7656]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5f7ea8]">
                     Most active
                   </p>
                   <p className="mt-3 text-3xl font-black text-slate-900">214</p>
                   <p className="mt-1 text-sm text-slate-500">Live requests nearby</p>
                 </div>
-                <div className="rounded-2xl border border-[#d7e1ee] bg-[#eef3f8] p-4">
+                <div className="rounded-2xl border border-[#dfe8f1] bg-[#f5f9fd] p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#35557e]">
                     Fastest zone
                   </p>
@@ -153,7 +153,7 @@ export default function HomeHeroSection({
                 </div>
               </div>
 
-              <div className="mt-6 rounded-[1.5rem] border border-[#e5dbcb] bg-[#fffaf2] p-5">
+              <div className="mt-6 rounded-[1.5rem] border border-[#e1eaf2] bg-[#fbfdff] p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold text-slate-900">Verified neighborhoods</p>
@@ -183,11 +183,11 @@ export default function HomeHeroSection({
               </div>
 
               <div className="mt-6 flex flex-wrap gap-3">
-                <div className="nh-tag border border-[#ddd4c7] bg-white px-4 py-2 text-sm text-slate-600">
+                <div className="nh-tag border border-[#dbe4ee] bg-white px-4 py-2 text-sm text-slate-600">
                   <MapPin size={14} className="text-[#35557e]" />
                   Nearest help in under 5 minutes
                 </div>
-                <div className="nh-tag border border-[#ddd4c7] bg-white px-4 py-2 text-sm text-slate-600">
+                <div className="nh-tag border border-[#dbe4ee] bg-white px-4 py-2 text-sm text-slate-600">
                   <ShieldCheck size={14} className="text-emerald-700" />
                   Verified profiles first
                 </div>

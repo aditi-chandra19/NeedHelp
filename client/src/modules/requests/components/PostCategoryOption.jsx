@@ -9,8 +9,8 @@ export default function PostCategoryOption({ category, selected, onSelect }) {
       onClick={() => onSelect(category.slug)}
       className={`rounded-2xl border px-4 py-5 text-center transition ${
         selected
-          ? "border-[#5f80af] bg-[#eef3f8] shadow-[0_18px_40px_rgba(35,59,93,0.1)]"
-          : "border-[#ddd4c7] bg-[#fffdf8] hover:border-[#cfc2ae] hover:bg-white"
+          ? "border-[#5f80af] bg-[#f5f9fd] shadow-[0_18px_40px_rgba(35,59,93,0.1)]"
+          : "border-[#dbe4ee] bg-white hover:border-[#c7d6e5] hover:bg-[#fbfdff]"
       }`}
     >
       <div

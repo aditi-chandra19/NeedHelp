@@ -1,0 +1,4 @@
+.env
+.mongodb-data/
+.mongodb-needhelp-data/
+node_modules/

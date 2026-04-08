@@ -17,17 +17,29 @@ import AuthTextField from "../components/AuthTextField.jsx";
 import { setStoredSession } from "../services/session.js";
 
 const highlights = [
-  "Connect with verified neighbors",
-  "Earn karma points by helping",
-  "Access emergency SOS features",
-  "Build trusted community network",
+  "Verified onboarding with stronger neighborhood trust checks",
+  "One account for requests, chats, payments, and karma history",
+  "Faster access to urgent help, response tracking, and SOS readiness",
+  "A profile that feels accountable from day one",
 ];
 
 const stats = [
-  { value: "10K+", label: "Active Users" },
-  { value: "50K+", label: "Tasks Done" },
+  { value: "10k+", label: "Trusted members" },
+  { value: "22", label: "Avg tasks per block" },
   { value: "98%", label: "Verified matches" },
 ];
+
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function isValidPhone(value) {
+  return /^[+\d][\d\s-]{9,}$/.test(value.trim());
+}
+
+function isStrongPassword(value) {
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(value);
+}
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -87,6 +99,31 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!isValidEmail(formData.email)) {
+      setStatus({
+        type: "error",
+        message: "Please enter a valid email address.",
+      });
+      return;
+    }
+
+    if (!isValidPhone(formData.phone)) {
+      setStatus({
+        type: "error",
+        message: "Please enter a valid phone number.",
+      });
+      return;
+    }
+
+    if (!isStrongPassword(formData.password)) {
+      setStatus({
+        type: "error",
+        message:
+          "Password must be at least 8 characters and include uppercase, lowercase, and a number.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setStatus({ type: "", message: "" });
 
@@ -121,7 +158,11 @@ export default function RegisterPage() {
     } catch (error) {
       setStatus({
         type: "error",
-        message: error.message || "Unable to create your account right now.",
+        message:
+          error.message ===
+          "Too many authentication attempts. Please wait a few minutes and try again."
+            ? "Too many sign-up attempts. Please wait a few minutes, then try again."
+            : error.message || "Unable to create your account right now.",
       });
     } finally {
       setIsSubmitting(false);
@@ -146,6 +187,15 @@ export default function RegisterPage() {
         throw new Error(data.message || `Unable to start ${provider} signup.`);
       }
 
+      if (data.token && data.user) {
+        setStoredSession({
+          token: data.token,
+          user: data.user,
+        });
+        navigate("/home", { replace: true });
+        return;
+      }
+
       setStatus({
         type: "success",
         message: data.message,
@@ -153,7 +203,11 @@ export default function RegisterPage() {
     } catch (error) {
       setStatus({
         type: "error",
-        message: error.message || `Unable to start ${provider} signup right now.`,
+        message:
+          error.message ===
+          "Too many authentication attempts. Please wait a few minutes and try again."
+            ? "Too many authentication attempts for now. Please wait a few minutes."
+            : error.message || `Unable to start ${provider} signup right now.`,
       });
     } finally {
       setActiveProvider("");
@@ -283,7 +337,7 @@ export default function RegisterPage() {
           type="button"
           onClick={() => handleSocialSignup("google")}
           disabled={activeProvider !== ""}
-          className="flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#ddd4c7] bg-white font-medium text-slate-700 transition hover:bg-[#fffdf8] disabled:cursor-not-allowed disabled:opacity-70"
+          className="nh-button-secondary flex h-11 w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-70"
         >
           <span className="text-base text-rose-500">G</span>
           {activeProvider === "google" ? "Connecting..." : "Google"}
@@ -292,7 +346,7 @@ export default function RegisterPage() {
           type="button"
           onClick={() => handleSocialSignup("facebook")}
           disabled={activeProvider !== ""}
-          className="flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#ddd4c7] bg-white font-medium text-slate-700 transition hover:bg-[#fffdf8] disabled:cursor-not-allowed disabled:opacity-70"
+          className="nh-button-secondary flex h-11 w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-70"
         >
           <span className="text-base font-bold text-slate-900">f</span>
           {activeProvider === "facebook" ? "Connecting..." : "Facebook"}

@@ -12,12 +12,7 @@ const containerVariants = {
   },
 };
 
-export default function HomeUrgentSection({
-  urgentRequests,
-  onHelp,
-  onChat,
-  activeAction,
-}) {
+export default function HomeUrgentSection({ urgentRequests }) {
   const MotionDiv = motion.div;
 
   return (
@@ -56,9 +51,6 @@ export default function HomeUrgentSection({
             <RequestCard
               key={request.id}
               request={request}
-              onHelp={onHelp}
-              onChat={onChat}
-              activeAction={activeAction}
             />
           ))}
         </MotionDiv>

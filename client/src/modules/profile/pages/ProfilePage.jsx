@@ -10,17 +10,17 @@ import {
   Star,
   TrendingUp,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { clearStoredSession, getStoredSession } from "../../auth/services/session.js";
 import AppPageFrame from "../../common/components/AppPageFrame.jsx";
 import { getCategoryVisual } from "../../requests/data/requestCatalog.js";
-import { fetchProfile } from "../services/profileService.js";
+import { fetchProfile, updateProfile } from "../services/profileService.js";
 
 const statCardClasses = {
-  sky: "bg-[#2c4d72] text-white",
+  sky: "bg-[#233b5d] text-white",
   emerald: "bg-[#256853] text-white",
-  indigo: "bg-[#5a4d8f] text-white",
-  amber: "bg-[#b7792e] text-white",
+  indigo: "bg-[#415f8c] text-white",
+  amber: "bg-[#886636] text-white",
 };
 
 const tabs = [
@@ -31,25 +31,38 @@ const tabs = [
 
 export default function ProfilePage() {
   const navigate = useNavigate();
+  const { userId } = useParams();
   const session = getStoredSession();
   const user = session?.user;
   const [profileData, setProfileData] = useState(null);
   const [activeTab, setActiveTab] = useState("requests");
   const [status, setStatus] = useState({ type: "", message: "" });
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    phone: "",
+    address: "",
+  });
 
   useEffect(() => {
     let isActive = true;
 
     async function loadProfile() {
       try {
-        const payload = await fetchProfile();
+        const payload = await fetchProfile(userId || "");
 
         if (!isActive) {
           return;
         }
 
         setProfileData(payload);
+        setEditForm({
+          name: payload.user?.name || "",
+          phone: payload.user?.phone || "",
+          address: payload.user?.address || "",
+        });
       } catch (error) {
         if (!isActive) {
           return;
@@ -71,13 +84,15 @@ export default function ProfilePage() {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [userId]);
 
   const resolvedUser = profileData?.user || user;
+  const shellUser = profileData?.isOwnProfile ? resolvedUser : user;
   const badgeList = profileData?.badges || [];
   const stats = profileData?.stats || [];
   const karma = profileData?.karma;
   const tabData = profileData?.tabs || {};
+  const isOwnProfile = Boolean(profileData?.isOwnProfile);
 
   const progressWidth = useMemo(() => {
     if (!karma?.nextLevelPoints) {
@@ -90,6 +105,38 @@ export default function ProfilePage() {
   function handleLogout() {
     clearStoredSession();
     navigate("/login", { replace: true });
+  }
+
+  function handleEditField(event) {
+    const { name, value } = event.target;
+    setEditForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  }
+
+  async function handleSaveProfile() {
+    setIsSaving(true);
+    setStatus({ type: "", message: "" });
+
+    try {
+      const payload = await updateProfile(editForm);
+      setProfileData(payload.profile);
+      setEditForm({
+        name: payload.profile.user?.name || "",
+        phone: payload.profile.user?.phone || "",
+        address: payload.profile.user?.address || "",
+      });
+      setIsEditing(false);
+      setStatus({ type: "success", message: payload.message });
+    } catch (error) {
+      setStatus({
+        type: "error",
+        message: error.message || "Unable to update profile right now.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   if (isLoading) {
@@ -108,7 +155,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <AppPageFrame onLogout={handleLogout} user={resolvedUser}>
+    <AppPageFrame onLogout={handleLogout} user={shellUser}>
       <main className="px-4 pb-16 pt-10 md:px-6">
         <div className="mx-auto max-w-6xl space-y-6">
           {status.message ? (
@@ -136,22 +183,53 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-900">You</h1>
-                  <div className="mt-2 space-y-1 text-sm text-slate-500">
-                    <p className="inline-flex items-center gap-2">
-                      <Phone size={14} />
-                      {resolvedUser?.phone || "Not added yet"}
-                    </p>
-                    <p className="inline-flex items-center gap-2">
-                      <MapPin size={14} />
-                      {resolvedUser?.address || "Your area"}
-                    </p>
-                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5f7ea8]">
+                    Trusted profile
+                  </p>
+                  <h1 className="mt-2 text-2xl font-bold text-slate-900">
+                    {isOwnProfile ? "You" : resolvedUser?.name || "Community Member"}
+                  </h1>
+                  {isEditing ? (
+                    <div className="mt-3 grid gap-3">
+                      <input
+                        name="name"
+                        value={editForm.name}
+                        onChange={handleEditField}
+                        className="nh-input"
+                        placeholder="Full name"
+                      />
+                      <input
+                        name="phone"
+                        value={editForm.phone}
+                        onChange={handleEditField}
+                        className="nh-input"
+                        placeholder="Phone number"
+                      />
+                      <input
+                        name="address"
+                        value={editForm.address}
+                        onChange={handleEditField}
+                        className="nh-input"
+                        placeholder="Area or address"
+                      />
+                    </div>
+                  ) : (
+                    <div className="mt-2 space-y-1 text-sm text-slate-500">
+                      <p className="inline-flex items-center gap-2">
+                        <Phone size={14} />
+                        {resolvedUser?.phone || "Not added yet"}
+                      </p>
+                      <p className="inline-flex items-center gap-2">
+                        <MapPin size={14} />
+                        {resolvedUser?.address || "Your area"}
+                      </p>
+                    </div>
+                  )}
                   <div className="mt-3 flex flex-wrap gap-2">
                     {badgeList.map((badge) => (
                       <span
                         key={badge}
-                        className="inline-flex items-center gap-1 rounded-full bg-[#f2ece1] px-3 py-1 text-xs font-semibold text-slate-600"
+                        className="inline-flex items-center gap-1 rounded-full border border-[#dfe8f1] bg-[#f8fbfe] px-3 py-1 text-xs font-semibold text-slate-600"
                       >
                         <BadgeCheck size={12} className="text-emerald-600" />
                         {badge}
@@ -161,19 +239,43 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setStatus({
-                    type: "success",
-                    message: "Edit profile will be the next interactive flow to add.",
-                  })
-                }
-                className="nh-button-secondary px-4 py-2"
-              >
-                <PencilLine size={15} />
-                Edit Profile
-              </button>
+              {isOwnProfile ? (
+                isEditing ? (
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditForm({
+                          name: resolvedUser?.name || "",
+                          phone: resolvedUser?.phone || "",
+                          address: resolvedUser?.address || "",
+                        });
+                      }}
+                      className="nh-button-secondary px-4 py-2"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveProfile}
+                      disabled={isSaving}
+                      className="nh-button-primary px-4 py-2 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {isSaving ? "Saving..." : "Save Profile"}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(true)}
+                    className="nh-button-secondary px-4 py-2"
+                  >
+                    <PencilLine size={15} />
+                    Edit Profile
+                  </button>
+                )
+              ) : null}
             </div>
           </section>
 
@@ -201,7 +303,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="mt-6">
-              <div className="h-3 rounded-full bg-[#e6ded1]">
+              <div className="h-3 rounded-full bg-[#e6edf4]">
                 <div
                   className="h-3 rounded-full bg-[#233b5d]"
                   style={{ width: `${progressWidth}%` }}
@@ -213,7 +315,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="mt-6 rounded-[1.5rem] bg-[#eef3f8] p-5">
+            <div className="mt-6 rounded-[1.5rem] border border-[#dfe8f1] bg-[#f5f9fd] p-5">
               <p className="font-semibold text-slate-900">Earn more karma points:</p>
               <ul className="mt-3 space-y-2 text-sm text-slate-600">
                 {karma?.tips?.map((tip) => (
@@ -224,7 +326,7 @@ export default function ProfilePage() {
           </section>
 
           <section className="nh-panel p-6">
-            <div className="grid grid-cols-3 rounded-full bg-[#f2ece1] p-1">
+            <div className="grid grid-cols-3 rounded-full bg-[#eef3f8] p-1">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -250,7 +352,7 @@ export default function ProfilePage() {
                     return (
                       <div
                         key={request.id}
-                        className="rounded-[1.5rem] border border-[#ddd4c7] bg-[#fffdf8] p-4"
+                        className="rounded-[1.5rem] border border-[#dfe8f1] bg-[#fbfdff] p-4"
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex gap-3">
@@ -259,7 +361,7 @@ export default function ProfilePage() {
                             </div>
                             <div>
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className="rounded-full bg-[#f2ece1] px-3 py-1 text-[11px] font-semibold text-slate-600">
+                                <span className="rounded-full border border-[#e1e9f2] bg-[#f5f9fd] px-3 py-1 text-[11px] font-semibold text-slate-600">
                                   {request.category}
                                 </span>
                                 <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-semibold text-emerald-700">
@@ -284,7 +386,7 @@ export default function ProfilePage() {
                 ? (tabData.helpingHistory || []).map((item) => (
                     <div
                       key={item.id}
-                      className="rounded-[1.5rem] border border-[#ddd4c7] bg-[#fffdf8] p-4"
+                      className="rounded-[1.5rem] border border-[#dfe8f1] bg-[#fbfdff] p-4"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex gap-3">
@@ -299,7 +401,7 @@ export default function ProfilePage() {
                             </p>
                           </div>
                         </div>
-                        <span className="rounded-full bg-[#f2ece1] px-3 py-1 text-[11px] font-semibold text-slate-600">
+                        <span className="rounded-full border border-[#e1e9f2] bg-[#f5f9fd] px-3 py-1 text-[11px] font-semibold text-slate-600">
                           {item.status}
                         </span>
                       </div>
@@ -311,10 +413,10 @@ export default function ProfilePage() {
                 ? (tabData.reviews || []).map((review) => (
                     <div
                       key={review.id}
-                      className="rounded-[1.5rem] border border-[#ddd4c7] bg-[#fffdf8] p-4"
+                      className="rounded-[1.5rem] border border-[#dfe8f1] bg-[#fbfdff] p-4"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f2ece1] font-semibold text-slate-700">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#eef3f8] font-semibold text-slate-700">
                           {review.reviewer[0]}
                         </div>
                         <div>
