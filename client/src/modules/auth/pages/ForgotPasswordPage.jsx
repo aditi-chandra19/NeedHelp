@@ -5,6 +5,7 @@ import AuthPageShell from "../components/AuthPageShell.jsx";
 import AuthPasswordField from "../components/AuthPasswordField.jsx";
 import AuthStatusBanner from "../components/AuthStatusBanner.jsx";
 import AuthTextField from "../components/AuthTextField.jsx";
+import { apiRequest } from "../../common/services/apiClient.js";
 
 const highlights = [
   "Reset access quickly without leaving the secure auth flow",
@@ -69,18 +70,10 @@ export default function ForgotPasswordPage() {
     setStatus({ type: "", message: "" });
 
     try {
-      const response = await fetch("/api/auth/reset-password", {
+      const data = await apiRequest("/api/auth/reset-password", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        body: formData,
       });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to reset password.");
-      }
 
       setStatus({ type: "success", message: data.message });
       window.setTimeout(() => navigate("/login"), 1000);

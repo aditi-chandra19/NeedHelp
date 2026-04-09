@@ -24,6 +24,7 @@ const initialPaymentData = {
   expiry: "",
   cvv: "",
   cardholderName: "",
+  simulationOutcome: "success",
 };
 
 export default function WalletPage() {
@@ -259,13 +260,18 @@ export default function WalletPage() {
               </div>
 
               {!showAddMoneyForm ? (
-                <button
-                  type="button"
-                  onClick={handleOpenAddMoney}
-                  className="nh-button-primary h-12 w-full text-base"
-                >
-                  Add Money to Wallet
-                </button>
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={handleOpenAddMoney}
+                    className="nh-button-primary h-12 w-full text-base"
+                  >
+                    Add Money to Wallet
+                  </button>
+                  <p className="text-sm text-slate-500">
+                    Fast wallet top-ups with UPI, cards, net banking, and wallet balance.
+                  </p>
+                </div>
               ) : (
                 <div className="grid gap-3 md:grid-cols-[1fr_auto_auto]">
                   <input

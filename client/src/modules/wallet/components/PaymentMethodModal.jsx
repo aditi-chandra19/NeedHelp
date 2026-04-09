@@ -1,10 +1,10 @@
 import { CreditCard, Landmark, Shield, Smartphone, Wallet } from "lucide-react";
 
 const paymentMethods = [
-  { id: "upi", label: "UPI", icon: Smartphone },
-  { id: "needhelp-wallet", label: "NeedHelp Wallet", icon: Wallet },
-  { id: "card", label: "Credit/Debit Card", icon: CreditCard },
-  { id: "netbanking", label: "Net Banking", icon: Landmark },
+  { id: "upi", label: "UPI", icon: Smartphone, helper: "Fast and secure" },
+  { id: "needhelp-wallet", label: "NeedHelp Wallet", icon: Wallet, helper: "Quick balance payment" },
+  { id: "card", label: "Credit/Debit Card", icon: CreditCard, helper: "Visa, Mastercard, RuPay" },
+  { id: "netbanking", label: "Net Banking", icon: Landmark, helper: "Major banks supported" },
 ];
 
 function formatCurrency(value = 0) {
@@ -82,6 +82,7 @@ export default function PaymentMethodModal({
                     <Icon size={22} />
                   </div>
                   <p className="mt-3 text-sm font-medium text-slate-900">{method.label}</p>
+                  <p className="mt-2 text-xs text-slate-500">{method.helper}</p>
                   {isSelected ? (
                     <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#35557e]">
                       Selected
@@ -158,13 +159,13 @@ export default function PaymentMethodModal({
 
         {selectedMethod === "netbanking" ? (
           <div className="mt-5 rounded-[1.1rem] border border-[#dbe4ee] bg-[#f8fbfe] px-4 py-4 text-sm text-slate-600">
-            Net banking is enabled for this demo flow. Tap pay to continue.
+            Net banking is available for this payment. Tap pay to continue.
           </div>
         ) : null}
 
         <div className="mt-5 flex items-center gap-2 rounded-[1rem] bg-[#f7f7f5] px-4 py-3 text-sm text-slate-600">
           <Shield size={16} className="text-emerald-600" />
-          Your payment is secure and encrypted
+          Your payment details are protected and verified
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3">

@@ -215,6 +215,7 @@ export default function ProfilePage() {
                     </div>
                   ) : (
                     <div className="mt-2 space-y-1 text-sm text-slate-500">
+                      <p>{resolvedUser?.email || "No email available"}</p>
                       <p className="inline-flex items-center gap-2">
                         <Phone size={14} />
                         {resolvedUser?.phone || "Not added yet"}

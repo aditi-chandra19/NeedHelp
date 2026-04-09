@@ -5,7 +5,8 @@ import AuthPageShell from "../components/AuthPageShell.jsx";
 import AuthPasswordField from "../components/AuthPasswordField.jsx";
 import AuthStatusBanner from "../components/AuthStatusBanner.jsx";
 import AuthTextField from "../components/AuthTextField.jsx";
-import { setStoredSession } from "../services/session.js";
+import { getLastUsedEmail, setStoredSession } from "../services/session.js";
+import { apiRequest } from "../../common/services/apiClient.js";
 
 const loginHighlights = [
   "Verified member profiles and neighborhood trust checks",
@@ -27,7 +28,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
+    email: getLastUsedEmail(),
     password: "",
   });
   const [status, setStatus] = useState({
@@ -35,7 +36,7 @@ export default function LoginPage() {
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeProvider, setActiveProvider] = useState("");
+  const socialProviders = ["Google", "Facebook"];
 
   const isFormIncomplete = useMemo(
     () => !formData.email.trim() || !formData.password.trim(),
@@ -48,14 +49,6 @@ export default function LoginPage() {
       ...current,
       [name]: value,
     }));
-  }
-
-  function fillDemoCredentials() {
-    setFormData({
-      email: "demo@example.com",
-      password: "password123",
-    });
-    setStatus({ type: "", message: "" });
   }
 
   async function handleSubmit(event) {
@@ -81,18 +74,10 @@ export default function LoginPage() {
     setStatus({ type: "", message: "" });
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const data = await apiRequest("/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        body: formData,
       });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed. Please try again.");
-      }
 
       setStoredSession({
         token: data.token,
@@ -104,61 +89,20 @@ export default function LoginPage() {
       }));
       navigate("/home", { replace: true });
     } catch (error) {
+      const isInvalidCredentials = error.message === "Invalid email or password.";
+
       setStatus({
         type: "error",
         message:
           error.message ===
           "Too many authentication attempts. Please wait a few minutes and try again."
             ? "Too many sign-in attempts. Wait a few minutes, then try again."
-            : error.message || "The server could not be reached. Try again shortly.",
+            : isInvalidCredentials
+              ? "Invalid email or password. If you have not signed up yet, create an account first."
+              : error.message || "The server could not be reached. Try again shortly.",
       });
     } finally {
       setIsSubmitting(false);
-    }
-  }
-
-  async function handleSocialLogin(provider) {
-    setActiveProvider(provider);
-    setStatus({ type: "", message: "" });
-
-    try {
-      const response = await fetch("/api/auth/social-login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ provider }),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || `Unable to start ${provider} login.`);
-      }
-
-      if (data.token && data.user) {
-        setStoredSession({
-          token: data.token,
-          user: data.user,
-        });
-        navigate("/home", { replace: true });
-        return;
-      }
-
-      setStatus({
-        type: "success",
-        message: data.message,
-      });
-    } catch (error) {
-      setStatus({
-        type: "error",
-        message:
-          error.message ===
-          "Too many authentication attempts. Please wait a few minutes and try again."
-            ? "Too many authentication attempts for now. Please wait a few minutes."
-            : error.message || `Unable to start ${provider} sign-in right now.`,
-      });
-    } finally {
-      setActiveProvider("");
     }
   }
 
@@ -173,24 +117,6 @@ export default function LoginPage() {
       cardTitle="Welcome back"
       cardDescription="Get back to requests, conversations, and community help in a few seconds."
     >
-      <div className="mb-6 rounded-[1.5rem] border border-[#dfe8f1] bg-[#f7fafe] px-4 py-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold text-[#233b5d]">Demo Account</p>
-            <p className="mt-1 text-xs leading-5 text-[#496484]">
-              Use `demo@example.com` and `password123` for a quick login.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={fillDemoCredentials}
-            className="nh-button-secondary rounded-xl px-3 py-2 text-xs font-semibold"
-          >
-            Use Demo
-          </button>
-        </div>
-      </div>
-
       <form className="space-y-5" onSubmit={handleSubmit}>
         <AuthTextField
           id="email"
@@ -244,29 +170,27 @@ export default function LoginPage() {
 
       <AuthStatusBanner type={status.type} message={status.message} />
 
-      <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-[0.18em] text-slate-400">
-        <div className="h-px flex-1 bg-slate-200" />
-        <span>Or continue with</span>
-        <div className="h-px flex-1 bg-slate-200" />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={() => handleSocialLogin("google")}
-          disabled={activeProvider !== ""}
-          className="nh-button-secondary h-11 w-full disabled:cursor-not-allowed disabled:opacity-70"
-        >
-          {activeProvider === "google" ? "Connecting..." : "Google"}
-        </button>
-        <button
-          type="button"
-          onClick={() => handleSocialLogin("facebook")}
-          disabled={activeProvider !== ""}
-          className="nh-button-secondary h-11 w-full disabled:cursor-not-allowed disabled:opacity-70"
-        >
-          {activeProvider === "facebook" ? "Connecting..." : "Facebook"}
-        </button>
+      <div className="mt-6 rounded-[1.3rem] border border-[#dfe8f1] bg-[#f8fbfe] px-4 py-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5f7ea8]">
+          Social Sign In
+        </p>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          Google and Facebook will be connected with real OAuth next. They are visible
+          here, but not active yet.
+        </p>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          {socialProviders.map((provider) => (
+            <button
+              key={provider}
+              type="button"
+              disabled
+              className="nh-button-secondary h-11 w-full cursor-not-allowed opacity-70"
+              title={`${provider} OAuth coming soon`}
+            >
+              {provider} Soon
+            </button>
+          ))}
+        </div>
       </div>
 
       <p className="mt-6 text-center text-sm text-slate-600">

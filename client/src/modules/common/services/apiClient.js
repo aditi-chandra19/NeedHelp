@@ -3,6 +3,18 @@ import {
   getStoredSession,
 } from "../../auth/services/session.js";
 
+function getApiBaseUrl() {
+  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+
+  if (!configuredBaseUrl) {
+    return "";
+  }
+
+  return configuredBaseUrl.endsWith("/")
+    ? configuredBaseUrl.slice(0, -1)
+    : configuredBaseUrl;
+}
+
 export async function apiRequest(
   path,
   { method = "GET", body, headers = {}, requiresAuth = false } = {}
@@ -23,7 +35,7 @@ export async function apiRequest(
     }
   }
 
-  const response = await fetch(path, {
+  const response = await fetch(`${getApiBaseUrl()}${path}`, {
     method,
     headers: requestHeaders,
     body: body !== undefined ? JSON.stringify(body) : undefined,

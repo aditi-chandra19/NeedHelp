@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import {
   ArrowRight,
-  CheckCircle2,
   Lock,
   LoaderCircle,
   Mail,
@@ -15,6 +14,7 @@ import AuthPasswordField from "../components/AuthPasswordField.jsx";
 import AuthStatusBanner from "../components/AuthStatusBanner.jsx";
 import AuthTextField from "../components/AuthTextField.jsx";
 import { setStoredSession } from "../services/session.js";
+import { apiRequest } from "../../common/services/apiClient.js";
 
 const highlights = [
   "Verified onboarding with stronger neighborhood trust checks",
@@ -46,7 +46,6 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeProvider, setActiveProvider] = useState("");
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -59,6 +58,7 @@ export default function RegisterPage() {
     type: "",
     message: "",
   });
+  const socialProviders = ["Google", "Facebook"];
 
   const isFormIncomplete = useMemo(
     () =>
@@ -128,18 +128,10 @@ export default function RegisterPage() {
     setStatus({ type: "", message: "" });
 
     try {
-      const response = await fetch("/api/auth/register", {
+      const data = await apiRequest("/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        body: formData,
       });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to create account.");
-      }
 
       setStoredSession({
         token: data.token,
@@ -166,51 +158,6 @@ export default function RegisterPage() {
       });
     } finally {
       setIsSubmitting(false);
-    }
-  }
-
-  async function handleSocialSignup(provider) {
-    setActiveProvider(provider);
-    setStatus({ type: "", message: "" });
-
-    try {
-      const response = await fetch("/api/auth/social-register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ provider }),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || `Unable to start ${provider} signup.`);
-      }
-
-      if (data.token && data.user) {
-        setStoredSession({
-          token: data.token,
-          user: data.user,
-        });
-        navigate("/home", { replace: true });
-        return;
-      }
-
-      setStatus({
-        type: "success",
-        message: data.message,
-      });
-    } catch (error) {
-      setStatus({
-        type: "error",
-        message:
-          error.message ===
-          "Too many authentication attempts. Please wait a few minutes and try again."
-            ? "Too many authentication attempts for now. Please wait a few minutes."
-            : error.message || `Unable to start ${provider} signup right now.`,
-      });
-    } finally {
-      setActiveProvider("");
     }
   }
 
@@ -326,31 +273,27 @@ export default function RegisterPage() {
 
       <AuthStatusBanner type={status.type} message={status.message} />
 
-      <div className="my-8 flex items-center gap-3 text-xs uppercase tracking-[0.18em] text-slate-400">
-        <div className="h-px flex-1 bg-slate-200" />
-        <span>Or sign up with</span>
-        <div className="h-px flex-1 bg-slate-200" />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={() => handleSocialSignup("google")}
-          disabled={activeProvider !== ""}
-          className="nh-button-secondary flex h-11 w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-70"
-        >
-          <span className="text-base text-rose-500">G</span>
-          {activeProvider === "google" ? "Connecting..." : "Google"}
-        </button>
-        <button
-          type="button"
-          onClick={() => handleSocialSignup("facebook")}
-          disabled={activeProvider !== ""}
-          className="nh-button-secondary flex h-11 w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-70"
-        >
-          <span className="text-base font-bold text-slate-900">f</span>
-          {activeProvider === "facebook" ? "Connecting..." : "Facebook"}
-        </button>
+      <div className="mt-8 rounded-[1.3rem] border border-[#dfe8f1] bg-[#f8fbfe] px-4 py-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5f7ea8]">
+          Social Sign Up
+        </p>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          Google and Facebook buttons are being reserved for real OAuth integration, so
+          they are shown but not clickable yet.
+        </p>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          {socialProviders.map((provider) => (
+            <button
+              key={provider}
+              type="button"
+              disabled
+              className="nh-button-secondary h-11 w-full cursor-not-allowed opacity-70"
+              title={`${provider} OAuth coming soon`}
+            >
+              {provider} Soon
+            </button>
+          ))}
+        </div>
       </div>
 
       <p className="mt-8 text-center text-sm text-slate-500">

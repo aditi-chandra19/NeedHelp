@@ -1,4 +1,5 @@
 const SESSION_STORAGE_KEY = "needhelp.session";
+const LAST_USED_EMAIL_KEY = "needhelp.lastUsedEmail";
 
 export function getStoredSession() {
   if (typeof window === "undefined") {
@@ -28,6 +29,12 @@ export function getStoredSession() {
 
 export function setStoredSession(session) {
   window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+
+  const email = session?.user?.email?.trim();
+
+  if (email) {
+    window.localStorage.setItem(LAST_USED_EMAIL_KEY, email);
+  }
 }
 
 export function updateStoredSessionUser(user) {
@@ -45,4 +52,12 @@ export function updateStoredSessionUser(user) {
 
 export function clearStoredSession() {
   window.localStorage.removeItem(SESSION_STORAGE_KEY);
+}
+
+export function getLastUsedEmail() {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  return window.localStorage.getItem(LAST_USED_EMAIL_KEY) || "";
 }

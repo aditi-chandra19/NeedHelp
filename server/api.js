@@ -39,6 +39,11 @@ const communitySummary = {
 };
 const platformFeeRate = 0.02;
 const flatPlatformFee = 5;
+const demoSimulationLabels = {
+  success: "Payment approved",
+  pending: "Payment pending",
+  failed: "Payment failed",
+};
 
 const categoryCatalog = [
   { slug: "home-daily", label: "Home & Daily Help" },
@@ -755,6 +760,38 @@ function getNotifications(userId = "") {
   return notificationsByUser[userId];
 }
 
+function buildDemoPaymentSimulation(method, amount, processingFee, outcome) {
+  const normalizedOutcome = demoSimulationLabels[outcome] ? outcome : "success";
+  const methodLabel =
+    method === "card"
+      ? "Credit/Debit Card"
+      : method === "netbanking"
+        ? "Net Banking"
+        : method === "needhelp-wallet"
+          ? "NeedHelp Wallet"
+          : "UPI";
+  const timestamp = Date.now();
+
+  return {
+    status: normalizedOutcome,
+    label: demoSimulationLabels[normalizedOutcome],
+    methodLabel,
+    gatewayReference: `SIM-GW-${timestamp}`,
+    transactionId: `SIM-TXN-${timestamp}`,
+    amount,
+    processingFee,
+    totalCharge: amount + processingFee,
+    isSandbox: true,
+    message:
+      normalizedOutcome === "failed"
+        ? "The payment could not be completed. Please try again."
+        : normalizedOutcome === "pending"
+          ? "Your payment is being processed. Confirmation may take a little longer."
+          : "Your payment was completed successfully.",
+    processedAt: new Date(timestamp).toISOString(),
+  };
+}
+
 function syncNotificationCount(user) {
   user.notificationCount = getNotifications(user.id).filter(
     (notification) => notification.unread
@@ -1093,6 +1130,12 @@ function buildWalletPayload(user) {
       platformFeeRate,
       flatPlatformFee,
       highlights: ["Fair pricing", "Secure payments", "Instant transfers"],
+    },
+    paymentSimulation: {
+      enabled: true,
+      description:
+        "Wallet payments support UPI, cards, net banking, and wallet balance for quick top-ups.",
+      supportedOutcomes: ["success", "pending", "failed"],
     },
     transactions: transactions.map((transaction) =>
       buildWalletTransactionPayload(transaction)
@@ -2194,6 +2237,7 @@ async function handleWalletTopUp(request, response) {
       expiry = "",
       cvv = "",
       cardholderName = "",
+      simulationOutcome = "success",
     } = await readJsonBody(request);
     const parsedAmount = Number(amount) || 0;
     const normalizedMethod = paymentMethod.trim().toLowerCase();
@@ -2202,12 +2246,14 @@ async function handleWalletTopUp(request, response) {
     const normalizedExpiry = expiry.trim();
     const normalizedCvv = cvv.trim();
     const normalizedCardholderName = cardholderName.trim();
+    const normalizedSimulationOutcome = simulationOutcome.trim().toLowerCase();
     const allowedMethods = [
       "upi",
       "needhelp-wallet",
       "card",
       "netbanking",
     ];
+    const allowedSimulationOutcomes = ["success", "pending", "failed"];
 
     if (parsedAmount < 100) {
       sendJson(response, 400, {
@@ -2219,6 +2265,13 @@ async function handleWalletTopUp(request, response) {
     if (!allowedMethods.includes(normalizedMethod)) {
       sendJson(response, 400, {
         message: "Please select a valid payment method.",
+      });
+      return true;
+    }
+
+    if (!allowedSimulationOutcomes.includes(normalizedSimulationOutcome)) {
+      sendJson(response, 400, {
+        message: "Please select a valid payment outcome.",
       });
       return true;
     }
@@ -2247,6 +2300,21 @@ async function handleWalletTopUp(request, response) {
 
     const processingFee =
       Math.round(parsedAmount * platformFeeRate) + flatPlatformFee;
+    const simulation = buildDemoPaymentSimulation(
+      normalizedMethod,
+      parsedAmount,
+      processingFee,
+      normalizedSimulationOutcome
+    );
+
+    if (normalizedSimulationOutcome === "failed") {
+      sendJson(response, 402, {
+        message: "Payment failed. Please try again.",
+        simulation,
+      });
+      return true;
+    }
+
     user.walletBalance += parsedAmount;
 
     getWalletTransactions(user.id).unshift({
@@ -2254,36 +2322,39 @@ async function handleWalletTopUp(request, response) {
       title: "Added money to wallet",
       amount: parsedAmount,
       type: "credit",
-      status: "Completed",
+      status: normalizedSimulationOutcome === "pending" ? "Pending" : "Completed",
       postedAt: "Just now",
       fee: processingFee,
-      note: `Via ${normalizedMethod === "card" ? "Card" : normalizedMethod === "netbanking" ? "Net Banking" : normalizedMethod === "needhelp-wallet" ? "NeedHelp Wallet" : "UPI"}`,
-      methodLabel:
-        normalizedMethod === "card"
-          ? "Credit/Debit Card"
-          : normalizedMethod === "netbanking"
-            ? "Net Banking"
-            : normalizedMethod === "needhelp-wallet"
-              ? "NeedHelp Wallet"
-              : "UPI",
+      note: `Via ${simulation.methodLabel}`,
+      methodLabel: simulation.methodLabel,
     });
 
     addNotification(user, {
-      title: "Wallet top-up completed",
-      message: `Rs ${parsedAmount} was added successfully to your wallet.`,
-      tone: "success",
+      title:
+        normalizedSimulationOutcome === "pending"
+          ? "Wallet top-up is pending"
+          : "Wallet top-up completed",
+      message:
+        normalizedSimulationOutcome === "pending"
+          ? `Rs ${parsedAmount} is being added to your wallet. Confirmation is in progress.`
+          : `Rs ${parsedAmount} was added successfully to your wallet.`,
+      tone: normalizedSimulationOutcome === "pending" ? "warning" : "success",
     });
 
     await persistCurrentState();
 
     sendJson(response, 200, {
-      message: `Rs ${parsedAmount} added to your wallet successfully.`,
+      message:
+        normalizedSimulationOutcome === "pending"
+          ? `Rs ${parsedAmount} is being processed and will reflect in your wallet shortly.`
+          : `Rs ${parsedAmount} added to your wallet successfully.`,
       wallet: buildWalletPayload(user),
       billing: {
         amount: parsedAmount,
         processingFee,
         totalCharge: parsedAmount + processingFee,
       },
+      simulation,
       user: buildUserPayload(user),
     });
   } catch (error) {
@@ -2514,8 +2585,7 @@ export async function handleApiRequest(request, response) {
 
       if (!user || !isValidCredential) {
         sendJson(response, 401, {
-          message:
-            "Invalid credentials. Use demo@example.com / password123 for the demo login.",
+          message: "Invalid email or password.",
         });
         return true;
       }
