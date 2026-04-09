@@ -1,4 +1,5 @@
-# NeedHelp 🤝
+<img width="838" height="238" alt="image" src="https://github.com/user-attachments/assets/78892fc8-205d-469f-88ba-fe895a47c163" />
+
 
 > **A community-powered local help platform — connecting people who need assistance with neighbors ready to help.**
 
