@@ -6,7 +6,7 @@
 NeedHelp is a full-stack neighborhood assistance marketplace. Users post local help requests, browse nearby tasks, respond as helpers, chat securely in-app, manage a wallet for paid tasks, and build reputation through karma and reviews — all in a fast, mobile-friendly experience designed for real communities.
 
 ---
-
+> Public portfolio showcase only. Reuse, redistribution, or commercial use of this code is not permitted.
 ## Table of Contents
 
 - [Features](#features)
